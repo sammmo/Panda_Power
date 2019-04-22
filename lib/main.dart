@@ -7,25 +7,69 @@ void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
 
+  final coordinationController = new CoordinationController();
+
   //CoordinationController coordinationController = new CoordinationController();
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Panda Power',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Panda Power'),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => LoadingScreen(coordinationController),//coordinationController.displayLoadingScreen(),
+        '/new_game': (context) => NewGameMenu(coordinationController),
+        '/main_page': (context) => new MainPage(coordinationController),//TODO: push state
+      },
+    );
+  }
+}
+
+class LoadingScreen extends StatefulWidget {
+
+  final coordinationController;
+
+  LoadingScreen(this.coordinationController, {Key key}) : super(key: key);
+
+  @override
+  _LoadingScreenState createState() => _LoadingScreenState();
+
+}
+
+class _LoadingScreenState extends State<LoadingScreen>{
+
+  onButtonPress() {
+    if (widget.coordinationController.isNewGame != null) {
+      if (widget.coordinationController.isNewGame) {
+        Navigator.pushReplacementNamed(context, '/new_game');
+      } else {
+        print('loaded game');
+        Navigator.pushReplacementNamed(context, '/main_page');
+      }
+    } else {
+      //do nothing
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Scaffold(
+      body: (
+        Center(
+          child: Column(
+            children: <Widget>[
+              Text('Loading Panda Power'),
+              RaisedButton(
+                onPressed: () => onButtonPress(),
+              )
+            ],
+          )
+        )
+      )
     );
   }
 }
@@ -35,7 +79,6 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key key, this.title}) : super(key: key);
 
   final String title;
-  //final CoordinationController coordinationController;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -48,6 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double fiveSecondAve = 0;
   UserState userState = UserState.sedentary;
   UserState longTermState = UserState.sedentary;
+  //CoordinationController coordinationController = new CoordinationController();
   MotionController motionController = new MotionController();
   String reminder = '';
 
