@@ -5,29 +5,38 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 
 //table and column names
-final String gameState = 'gameState';
+final String gameStateTable = 'gameState';
 final String pandaNameColumn = 'pandaName';
 final String userNameColumn = 'userName';
 final String columnId = '_id';
+final String isDemoColumn = 'isDemo';
 
 class GameState { //model
 
   int id;
   String pandaName;
   String userName;
+  bool isDemo;
 
-  GameState();
+  GameState(this.id, this.pandaName, this.userName, this.isDemo);
 
-  GameState.fromMap(Map map) {
-    id = map[columnId];
-    pandaName = map[pandaNameColumn];
-    userName = map[userNameColumn];
+  static fromMap(Map map) {
+
+    var isDemo = false;
+
+    if (map[isDemoColumn] != null && map[isDemoColumn] == true) {
+      isDemo = true;
+    }
+
+    return new GameState(
+        map[columnId], map[pandaNameColumn], map[userNameColumn], isDemo);
   }
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
       pandaNameColumn: pandaName,
       userNameColumn: userName,
+      isDemoColumn: isDemo,
     };
 
     if (id != null) {
@@ -63,11 +72,13 @@ class DatabaseRepository {
   }
 
   Future _onCreate(Database db, int version) async {
+    print('creating database');
     await db.execute('''
-      CREATE TABLE $gameState (
+      CREATE TABLE $gameStateTable (
         $columnId INTEGER PRIMARY KEY,
         $pandaNameColumn TEXT NOT NULL,
-        $userNameColumn TEXT NOT NULL
+        $userNameColumn TEXT NOT NULL,
+        $isDemoColumn INTEGER NOT NULL
       )
     
     '''
@@ -76,8 +87,8 @@ class DatabaseRepository {
 
   Future<GameState> queryState(int id) async {
     Database db = await database;
-    List<Map> maps = await db.query(gameState,
-      columns: [columnId, pandaNameColumn, userNameColumn],
+    List<Map> maps = await db.query(gameStateTable,
+      columns: [columnId, pandaNameColumn, userNameColumn, isDemoColumn],
       where: '$columnId = ?',
       whereArgs: [id]
     );
@@ -89,7 +100,7 @@ class DatabaseRepository {
 
   Future<int> saveState(GameState state) async {
     Database db = await database;
-    int id = await db.insert(gameState, state.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
+    int id = await db.insert(gameStateTable, state.toMap(), conflictAlgorithm: ConflictAlgorithm.replace);
     return id;
 
   }

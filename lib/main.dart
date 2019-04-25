@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:panda_power/controllers/coordination_controller.dart';
 import 'package:panda_power/controllers/motion_controller.dart';
 import 'package:panda_power/enums.dart';
+import 'package:panda_power/widgets/loading_screen.dart';
+import 'package:panda_power/widgets/main_page.dart';
+import 'package:panda_power/widgets/new_game_menu.dart';
 
 void main() => runApp(MyApp());
 
@@ -13,66 +16,184 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    var routes = <String, WidgetBuilder> {
+      NewGameMenu.routeName: (BuildContext context) => new NewGameMenu(coordinationController),
+      MainPage.routeName: (BuildContext context) => new MainPage(coordinationController),
+      SettingsPage.routeName: (BuildContext context) => new SettingsPage(coordinationController),
+    };
     return MaterialApp(
       title: 'Panda Power',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => LoadingScreen(coordinationController),//coordinationController.displayLoadingScreen(),
-        '/new_game': (context) => NewGameMenu(coordinationController),
-        '/main_page': (context) => new MainPage(coordinationController),//TODO: push state
-      },
+      home: new LoadingScreen(coordinationController),
+      routes: routes,
     );
   }
 }
 
-class LoadingScreen extends StatefulWidget {
+class SettingsPage extends StatefulWidget {
 
   final coordinationController;
 
-  LoadingScreen(this.coordinationController, {Key key}) : super(key: key);
+  static const String routeName = '/SettingsPage';
+
+  SettingsPage(this.coordinationController);
 
   @override
-  _LoadingScreenState createState() => _LoadingScreenState();
-
+  _SettingsPageState createState() => new _SettingsPageState();
 }
 
-class _LoadingScreenState extends State<LoadingScreen>{
+class _SettingsPageState extends State<SettingsPage> {
 
-  onButtonPress() {
-    if (widget.coordinationController.isNewGame != null) {
-      if (widget.coordinationController.isNewGame) {
-        Navigator.pushReplacementNamed(context, '/new_game');
-      } else {
-        print('loaded game');
-        Navigator.pushReplacementNamed(context, '/main_page');
-      }
-    } else {
-      //do nothing
-    }
+  bool _switchValue;
+  String userName;
+  String pandaName;
+
+  var _pandaNameChangeIsVisible = false;
+  var _changePandaNameButtonIsVisible = true;
+  var _userNameChangeIsVisible = false;
+  var _changeUserNameButtonIsVisible = true;
+
+  _showChangeUserNameBox() {
+
+    setState(() {
+      _userNameChangeIsVisible = true;
+    });
+  }
+
+  _showChangePandaNameBox() {
+    setState(() {
+      _pandaNameChangeIsVisible = true;
+      _changePandaNameButtonIsVisible = false;
+    });
+  }
+
+  _changeUserName(String name) {
+
+    setState(() {
+      widget.coordinationController.settings.userName = name;
+    });
+  }
+
+  _changePandaName(String name) {
+
+    setState(() {
+      _pandaNameChangeIsVisible = false;
+      widget.coordinationController.settings.pandaName = name;
+      pandaName = name;
+      _changePandaNameButtonIsVisible = true;
+    });
+  }
+
+  _changeIsDemo(bool value) {
+    
+    widget.coordinationController.settings.isDemo = value;
+
+    setState(() {
+      _switchValue = value;
+    });
+    
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    _switchValue = widget.coordinationController.settings.isDemo;
+    userName = widget.coordinationController.settings.userName;
+    pandaName = widget.coordinationController.settings.pandaName;
+
   }
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
-      body: (
-        Center(
-          child: Column(
-            children: <Widget>[
-              Text('Loading Panda Power'),
-              RaisedButton(
-                onPressed: () => onButtonPress(),
-              )
-            ],
-          )
-        )
-      )
+      appBar: AppBar(
+        title: Text('Settings'),
+      ),
+      body: Center(
+        child: Column(
+          children: <Widget>[
+            Spacer(flex: 1,),
+            Row(
+              children: <Widget>[
+                Text('Your panda name is: $pandaName'),
+                Visibility(
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 50,
+                        width: 250,
+                        child: TextEntryWidget(
+                          onChanged: (name) => _changePandaName(name),
+                        ),
+                      )
+
+                    ],
+                  ),
+                  visible: _pandaNameChangeIsVisible,
+                ),
+                Visibility(
+                  child: RaisedButton(
+                    child: Text('change'),
+                    onPressed: () => _showChangePandaNameBox(),
+                  ),
+                  visible: _changePandaNameButtonIsVisible,
+                )
+
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                Text('Your name is: $userName'),
+                Visibility(
+                  child: Row(),
+                  visible: _userNameChangeIsVisible,
+                )
+              ],
+            ),
+
+            Row(
+              children: <Widget>[
+                Text('use demo settings'),
+                Switch(
+                  value: _switchValue,
+                  onChanged: (value) => _changeIsDemo(value),
+                )
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
 }
+
+class TextEntryWidget extends StatelessWidget {
+  final onChanged;
+
+  const TextEntryWidget({Key key, this.onChanged}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return TextField(
+      decoration: InputDecoration(
+
+      ),
+      textCapitalization: TextCapitalization.words,
+      onSubmitted: this.onChanged,
+      autofocus: true,
+    );
+  }
+
+
+}
+
+
 
 class MyHomePage extends StatefulWidget {
 

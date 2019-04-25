@@ -15,6 +15,13 @@ class MotionController {
   List lastDataArray;
   List oneSecondAverageArray;
   List activeArray;
+
+  StreamController<UserState> oneSecondStreamController = new StreamController<UserState>();
+  StreamController<UserState> fiveSecondStreamController = new StreamController<UserState>();
+
+
+  updateOneSecond(UserState state) => this.oneSecondStreamController.add(state);
+  updateFiveSeconds(UserState state) => this.fiveSecondStreamController.add(state);
   
   ValueNotifier<UserState> longTermState = new ValueNotifier(UserState.sedentary);
   ValueNotifier<UserState> userState = new ValueNotifier(UserState.sedentary);
@@ -30,6 +37,7 @@ class MotionController {
   //ValueNotifier<VectorMagnitude> magnitude = new ValueNotifier(VectorMagnitude.lessThan70);
 
   MotionController() {
+
     this.lastDataArray = [];
     this.oneSecondAverageArray = [];
     this.activeArray = [];
@@ -89,6 +97,14 @@ class MotionController {
           var average = (sum / readings.length);
           oneSecondAverage.value = average;
 
+          if (average >= 70) {
+            updateOneSecond(UserState.active);
+          }
+
+          if (average <= 69) {
+            updateOneSecond(UserState.sedentary);
+          }
+
           oneSecondAverageArray.add(average);
 
           if (oneSecondAverageArray.length == 5) {
@@ -122,15 +138,18 @@ class MotionController {
         if (fiveSecondAverage.value > 70.0) {
 
           activeArray.add(UserState.active);
+          updateFiveSeconds(UserState.active);
 
           if (userState.value != UserState.active) {
             userState.value = UserState.active;
+
           }
         }
 
         if (fiveSecondAverage.value < 70.0) {
 
           activeArray.add(UserState.sedentary);
+          updateFiveSeconds(UserState.sedentary);
 
           if (userState.value != UserState.sedentary) {
             userState.value = UserState.sedentary;
@@ -185,6 +204,8 @@ class MotionController {
       }
     }
   }
+
+
 
 }
 
