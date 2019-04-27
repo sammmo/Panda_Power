@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:panda_power/enums.dart';
 import 'package:panda_power/main.dart';
 import 'package:panda_power/models/settings.dart';
+import 'package:panda_power/widgets/settings.dart';
 
 class MainPage extends StatefulWidget {
 

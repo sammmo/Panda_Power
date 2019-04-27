@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:panda_power/controllers/coordination_controller.dart';
-import 'package:panda_power/main.dart';
 import 'package:panda_power/widgets/main_page.dart';
 import 'package:panda_power/widgets/new_game_menu.dart';
+import 'package:panda_power/widgets/settings.dart';
 
 class LoadingScreen extends StatefulWidget {
 
@@ -80,7 +80,12 @@ class _LoadingScreenState extends State<LoadingScreen>{
                     Spacer(flex: 1,),
                     Visibility(
                       visible: _showLoadingMessage,
-                      child: Text('Loading Panda Power'),
+                      child: Column(
+                        children: <Widget>[
+                          Logo(),
+                          Text('Loading Panda Power'),
+                        ],
+                      ),
                     ),
                     Visibility(
                       visible: _showResume,
@@ -110,4 +115,50 @@ class _LoadingScreenState extends State<LoadingScreen>{
         )
     );
   }
+}
+
+class PandaHead extends StatefulWidget {
+
+  @override
+  _PandaHeadState createState() => new _PandaHeadState();
+}
+
+class Logo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Container(
+      child: Image.asset('assets/images/logo.png', color: Colors.white,),
+    );
+  }
+  
+}
+
+class _PandaHeadState extends State<PandaHead>{
+
+  //blink
+  //smile
+  //blush
+  //sleep
+  //exercise
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return null;
+  }
+}
+
+class BambooForest extends StatelessWidget {
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Container(
+      child: Image.asset(''),
+    );
+  }
+
 }
