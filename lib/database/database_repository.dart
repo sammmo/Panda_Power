@@ -1,5 +1,6 @@
 import 'dart:core';
 import 'dart:io';
+import 'package:panda_power/models/game_state.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,43 +11,9 @@ final String pandaNameColumn = 'pandaName';
 final String userNameColumn = 'userName';
 final String columnId = '_id';
 final String isDemoColumn = 'isDemo';
-
-class GameState { //model
-
-  int id;
-  String pandaName;
-  String userName;
-  bool isDemo;
-
-  GameState(this.id, this.pandaName, this.userName, this.isDemo);
-
-  static fromMap(Map map) {
-
-    var isDemo = false;
-
-    if (map[isDemoColumn] != null && map[isDemoColumn] == true) {
-      isDemo = true;
-    }
-
-    return new GameState(
-        map[columnId], map[pandaNameColumn], map[userNameColumn], isDemo);
-  }
-
-  Map<String, dynamic> toMap() {
-    var map = <String, dynamic>{
-      pandaNameColumn: pandaName,
-      userNameColumn: userName,
-      isDemoColumn: isDemo,
-    };
-
-    if (id != null) {
-      map[columnId] = id;
-    }
-
-    return map;
-  }
-
-}
+final String pandaStateColumn = 'pandaState';
+final String powerBarValueColumn = 'powerBarValue';
+final String powerBarGoalValueColumn = 'powerBarGoalValue';
 
 class DatabaseRepository {
 
@@ -78,17 +45,28 @@ class DatabaseRepository {
         $columnId INTEGER PRIMARY KEY,
         $pandaNameColumn TEXT NOT NULL,
         $userNameColumn TEXT NOT NULL,
-        $isDemoColumn INTEGER NOT NULL
+        $isDemoColumn INTEGER NOT NULL,
+        $pandaStateColumn TEXT NOT NULL,
+        $powerBarValueColumn REAL NOT NULL,
+        $powerBarGoalValueColumn REAL NOT NULL
       )
-    
     '''
     );
+  }
+
+  Future<int> deleteGame(int id) async {
+    Database db = await database;
+    int deleted = await db.delete(gameStateTable,
+    where: '$columnId = ?',
+    whereArgs: [id]);
+
+    return deleted;
   }
 
   Future<GameState> queryState(int id) async {
     Database db = await database;
     List<Map> maps = await db.query(gameStateTable,
-      columns: [columnId, pandaNameColumn, userNameColumn, isDemoColumn],
+      columns: [columnId, pandaNameColumn, userNameColumn, isDemoColumn, pandaStateColumn, powerBarValueColumn, powerBarGoalValueColumn],
       where: '$columnId = ?',
       whereArgs: [id]
     );

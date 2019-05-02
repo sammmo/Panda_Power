@@ -1,12 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:panda_power/controllers/coordination_controller.dart';
 import 'package:panda_power/widgets/main_page.dart';
 import 'package:panda_power/widgets/new_game_menu.dart';
+import 'package:panda_power/widgets/panda_head.dart';
 import 'package:panda_power/widgets/settings.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class LoadingScreen extends StatefulWidget {
 
   final coordinationController;
+
+  static const String routeName = '/LoadingScreen';
 
   LoadingScreen(this.coordinationController, {Key key}) : super(key: key);
 
@@ -19,22 +25,24 @@ class _LoadingScreenState extends State<LoadingScreen>{
 
   var _showResume = false;
   var _showAdopt = false;
-  var _showSettings = false;
-  var _showLoadingMessage = true;
+  var _showLogo = true;
 
   @override
-  initState()  {
+  initState() {
     super.initState();
+
+    //TODO: change this to be delayed for however long it takes to
+    //finish querying db
     
-    Future.delayed(Duration(seconds: 5), () {
+    Future.delayed(Duration(seconds: 30), () {
       setState(() {
-        _showLoadingMessage = false;
+        _showLogo = false;
       });
-      _loadStateInController();
+      _loadControllerState();
     });
   }
 
-  _loadStateInController() async {
+  _loadControllerState() async {
     var result = await widget.coordinationController.loadState();
     print(result);
 
@@ -42,7 +50,6 @@ class _LoadingScreenState extends State<LoadingScreen>{
       print("I THINK THIS IS A NEW GAME");
       setState(() {
         _showAdopt = true;
-        //_showSettings = true;
       });
     }
 
@@ -50,77 +57,148 @@ class _LoadingScreenState extends State<LoadingScreen>{
       print("THIS IS AN OLD GAME");
       setState(() {
         _showResume = true;
-        _showSettings = true;
       });
-    }
-    //return Future.value(result);
-  }
-
-  onButtonPress() {
-    if (widget.coordinationController.isNewGame != null) {
-      if (widget.coordinationController.isNewGame) {
-        //Navigator.pushReplacementNamed(context, NewGameMenu.routeName);
-      } else {
-        print('loaded game');
-        //Navigator.pushReplacementNamed(context, MainPage.routeName);
-      }
-    } else {
-      //do nothing
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
-        body: (
-            Center(
+      //TODO: break this up to smaller stateful(visibility) widgets
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Spacer(
+              flex: 1,
+            ),
+            Expanded(
+                child: PandaHead(),
+                flex: 4
+            ),
+            Visibility(
+              visible: _showLogo,
+              child: Expanded(
+                  child: Loading(),
+              flex: 6,),
+            ),
+            Visibility(
+              visible: _showResume,
+              child: Expanded(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    Spacer(flex: 1,),
-                    Visibility(
-                      visible: _showLoadingMessage,
-                      child: Column(
-                        children: <Widget>[
-                          Logo(),
-                          Text('Loading Panda Power'),
-                        ],
+                    Spacer(
+                      flex: 1,
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: RaisedButton(
+                          onPressed:() => Navigator.pushReplacementNamed(context, MainPage.routeName),
+                          child: Text('Resume Game'),
+                        ),
                       ),
                     ),
-                    Visibility(
-                      visible: _showResume,
-                      child: RaisedButton(
-                        child: Text('Resume Game'),
-                        onPressed: () => Navigator.pushNamed(context, MainPage.routeName),
+                    Expanded(
+                      flex: 1,
+                      child:  Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: RaisedButton(
+                          onPressed: () => Navigator.pushNamed(context, SettingsPage.routeName),
+                          child: Text('Settings'),
+                        ),
                       ),
                     ),
-                    Visibility(
-                      visible: _showAdopt,
-                      child: RaisedButton(
-                        child: Text('Adopt a Panda'),
-                        onPressed: () => Navigator.pushNamed(context, NewGameMenu.routeName),
-                      ),
-                    ),
-                    Visibility(
-                      visible: _showSettings,
-                      child: RaisedButton(
-                        child: Text('Settings'),
-                        onPressed: () => Navigator.pushNamed(context, SettingsPage.routeName),
-                      ),
-                    ),
-                    Spacer(flex: 1,),
+                    Spacer(
+                      flex: 1
+                    )
                   ],
+                ),
+                flex: 5,),
+            ),
+            Visibility(
+              visible: _showAdopt,
+              child: Spacer(
+                flex: 1,
+              )
+            ),
+            Visibility(
+              visible: _showAdopt,
+              child: Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: RaisedButton(
+                      onPressed: () => Navigator.pushReplacementNamed(context, NewGameMenu.routeName),
+                      child: Center(
+                        child: Text(
+                            'adopt a panda',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 50,
+                            color: Colors.black45,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                flex: 3,
+              ),
+            ),
+            Visibility(
+                visible: _showAdopt,
+                child: Spacer(
+                  flex: 1,
                 )
+            ),
+            Expanded(
+              child: BambooForest(),
+              flex: 2
             )
-        )
+          ],
+        ),
+      )
     );
   }
 }
 
-class PandaHead extends StatefulWidget {
-
+class Loading extends StatelessWidget {
   @override
-  _PandaHeadState createState() => new _PandaHeadState();
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return Column(
+      children: <Widget>[
+        Spacer(
+          flex: 1,
+        ),
+        Expanded(
+          flex: 5,
+          child: Logo(),
+        ),
+        Expanded (
+          flex: 2,
+          child: LoadingIndicator(),
+        ),
+        Spacer(
+          flex: 1,
+        ),
+      ],
+    );
+  }
+
+}
+
+class LoadingIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return SpinKitCircle(
+      color: Theme.of(context).buttonColor,
+      size: 50.0,
+    );
+  }
 }
 
 class Logo extends StatelessWidget {
@@ -128,36 +206,21 @@ class Logo extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: implement build
     return Container(
-      child: Image.asset('assets/images/logo.png', color: Colors.white,),
+      child: Image.asset(
+        'assets/images/logo.png',
+      ),
     );
   }
   
 }
 
-class _PandaHeadState extends State<PandaHead>{
-
-  //blink
-  //smile
-  //blush
-  //sleep
-  //exercise
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return null;
-  }
-}
-
 class BambooForest extends StatelessWidget {
-
-
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Container(
-      child: Image.asset(''),
+      child: Image.asset('assets/images/bambooForrest.png'),
     );
   }
 

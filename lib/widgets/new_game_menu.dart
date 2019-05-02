@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:panda_power/widgets/main_page.dart';
+import 'package:panda_power/widgets/panda_head.dart';
+
+import 'loading_screen.dart';
 
 class NewGameMenu extends StatefulWidget {
 
@@ -17,6 +20,7 @@ class _NewGameMenuState extends State<NewGameMenu> {
   String pandaName;
   String userName;
   bool _showSaveButton = false;
+  bool _showHead = true;
 
   _changePandaName(String name) {
     setState(() {
@@ -25,6 +29,17 @@ class _NewGameMenuState extends State<NewGameMenu> {
 
       if (this.userName != null && this.pandaName != null) {
         _showSaveButton = true;
+      }
+    });
+  }
+
+  _hideFace() {
+    print('face');
+    setState(() {
+      if (_showHead == true) {
+        _showHead = false;
+      } else {
+        _showHead = true;
       }
     });
   }
@@ -105,34 +120,64 @@ class _NewGameMenuState extends State<NewGameMenu> {
     return Scaffold(
         body: Center(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Spacer(flex: 1,),
-              Text(message == null? '' : message),
-              Row(
-                children: <Widget>[
-                  Text('Your Pandas Name: '),
-                  //Text(pandaName == null? '' : pandaName),
-                ],
+              Expanded(
+                flex: 4,
+                child: PandaHead(),
               ),
-              SizedBox(
-                width: 250,
-                child: TextEntryWidget(onChanged: (name) => _changePandaName(name), name: pandaName),
+              Spacer(flex: 1,),
+
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  color: Colors.white,
+                  child: Row(
+                    children: <Widget>[
+                      Text('Your Panda\'s Name: '),
+                      Expanded(
+                        flex: 2,
+                        child: TextEntryWidget(
+                            onChanged: (name) => _changePandaName(name),
+                            onTap: () => _hideFace(),
+                            onDone: () => _hideFace(),
+                            name: pandaName),
+                      ),
+                    ],
+                  )
+                ),
               ),
-              Row(
-                children: <Widget>[
-                  Text('Your name: '),
-                ],
-              ),
-              SizedBox(
-                width: 250,
-                child: TextEntryWidget(onChanged: (name) => _changeUserName(name), name: userName),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                    padding: EdgeInsets.all(8),
+                    color: Colors.white,
+                    child: Row(
+                      children: <Widget>[
+                        Text('Your Name: '),
+                        Expanded(
+                          flex: 2,
+                          child: TextEntryWidget(onChanged: (name) => _changeUserName(name), name: userName),
+                        ),
+                      ],
+                    )
+                ),
               ),
               Visibility(
                 visible: _showSaveButton,
-                child: RaisedButton(onPressed: _save,
-                  child: Text('Start Game')),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: RaisedButton(onPressed: _save,
+                    child: Text('Start Game')),
+                ),
               ),
               Spacer(flex: 1,),
+              Expanded(
+                flex: 2,
+                child: BambooForest(),
+              )
             ],
           ),
         )
@@ -143,8 +188,10 @@ class _NewGameMenuState extends State<NewGameMenu> {
 class TextEntryWidget extends StatelessWidget {
   final onChanged;
   final name;
+  final onTap;
+  final onDone;
 
-  const TextEntryWidget({Key key, this.onChanged, this.name}) : super(key: key);
+  const TextEntryWidget({Key key, this.onChanged, this.name, this.onTap, this.onDone}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

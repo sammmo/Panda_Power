@@ -1,5 +1,5 @@
 /*
-Shared widgets
+Shared util widgets
  */
 
 import 'package:flutter/material.dart';

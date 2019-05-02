@@ -4,6 +4,8 @@ class Settings {
   bool isDemo;
   String userName;//accessible by coordcontroller
   String pandaName; //accessible by coordcontroller
+  DateTime startSleep;
+  DateTime endSleep;
 
   Settings(this.id, this.isDemo, this.pandaName, this.userName);
 
@@ -19,8 +21,8 @@ class Settings {
     return map;
   }
 
-  static fromMap(Map map) {
+  /*static fromMap(Map map) {
     return new Settings(map['id'], map['isDemo'], map['userName'], map['pandaName']);
-  }
+  }*/
 
 }

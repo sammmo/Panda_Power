@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:panda_power/enums.dart';
-import 'package:panda_power/main.dart';
-import 'package:panda_power/models/settings.dart';
+import 'package:panda_power/widgets/loading_screen.dart';
+import 'package:panda_power/widgets/panda_head.dart';
+import 'package:panda_power/widgets/power_bar.dart';
 import 'package:panda_power/widgets/settings.dart';
+import 'loading_screen.dart';
 
 class MainPage extends StatefulWidget {
 
   final coordinationController;
+  final notifier;
 
   static String routeName = '/MainPage';
 
-  const MainPage(this.coordinationController, {Key key}) : super(key: key);
+  const MainPage(this.coordinationController, this.notifier, {Key key}) : super(key: key);
 
   @override
   _MainPageState createState() => _MainPageState();
@@ -20,10 +22,11 @@ class _MainPageState extends State<MainPage> {
 
   var userName;
   var pandaName;
-  
+
+
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
 
     if (widget.coordinationController.settings.userName != null) {
@@ -38,6 +41,14 @@ class _MainPageState extends State<MainPage> {
       pandaName = 'Panda';
     }
 
+    widget.coordinationController.startMotionSensing();
+    widget.notifier.messages.stream.listen((message) {
+      Navigator.of(context).push(PageRouteBuilder(
+          opaque: false,
+          pageBuilder: (BuildContext context, _, __) {
+            return message;
+          }));
+    });
   }
 
   @override
@@ -45,103 +56,44 @@ class _MainPageState extends State<MainPage> {
     // TODO: implement build
     return Scaffold(
       appBar: new AppBar(
-        title: Text('Panda Power!'),
+        title: Text('Power Up Panda!'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () => Navigator.pushNamed(context, SettingsPage.routeName),
+          ),
+        ],
       ),
       body: Center(
-          child: Column(
-            children: <Widget>[
-              Spacer(flex: 1),
-              Text('Panda name: $pandaName'),
-              Text('User name: $userName'),
-              RaisedButton(
-                onPressed: () => Navigator.pushNamed(context, SettingsPage.routeName),
-                child: Text('Edit Settings'),
-              ),
-              RaisedButton(
-                  onPressed: () => widget.coordinationController.sendNote(),
-                  child: Text('send notification')
-              ),
-              UserStateDisplay(widget.coordinationController.motionController),
-              Spacer(flex: 1),
-            ],
-          )
-      ),
-    );
-  }
-}
 
-class UserStateDisplay extends StatefulWidget {
-
-  final motionController;
-
-  UserStateDisplay(this.motionController);
-
-  @override
-  _UserStateDisplayState createState() => _UserStateDisplayState();
-}
-
-class _UserStateDisplayState extends State<UserStateDisplay> {
-
-  var userState;
-  var longTermState;
-
- @override
- void initState() {
-    // TODO: implement initState
-    super.initState();
-
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return Column(
-      children: <Widget>[
-        Row(
+        child: Stack(
           children: <Widget>[
-            Text('One second Average: '),
-            StreamBuilder(
-              stream: widget.motionController.oneSecondStreamController.stream,
-              initialData: UserState.sedentary,
-              builder: (context, state) {
-                if (state.hasError) {
-                  return Text('error');
-                } else if (state.data == null) {
-                  return Text('null');
-                } else {
-                  switch (state.data) {
-                    case UserState.sedentary: return Text('sedentary', style: TextStyle(color: Colors.red, fontSize: 40),);
-                    case UserState.active: return Text('active', style: TextStyle(color: Colors.green, fontSize: 40));
-                  }
-                }
 
-              },
-            ),
-          ],
+        Column(
+        children: <Widget>[
+            Spacer(flex: 1),
+        Expanded(
+          flex: 4,
+          child: PandaHead(
+              coordinationController: widget.coordinationController
+          ),
         ),
-        Row(
-          children: <Widget>[
-            Text('Five Second Average:'),
-            StreamBuilder(
-              stream: widget.motionController.fiveSecondStreamController.stream,
-              initialData: UserState.sedentary,
-              builder: (context, state) {
-                if (state.hasError) {
-                  return Text('error');
-                } else if (state.data == null) {
-                  return Text('null');
-                } else {
-                  switch (state.data) {
-                    case UserState.sedentary: return Text('sedentary', style: TextStyle(color: Colors.red, fontSize: 40),);
-                    case UserState.active: return Text('active', style: TextStyle(color: Colors.green, fontSize: 40));
-                  }
-                }
+        Expanded(
+          flex: 3,
+          child: PowerBar(widget.coordinationController.powerBar),
+        ),
 
-              },
-            ),
+
+        Text('Panda name: $pandaName'),
+        Text('User name: $userName'),
+        Spacer(flex: 1),
+          BambooForest(),
+        ],
+      ),
           ],
         )
-      ],
+
+      )
     );
   }
 }
